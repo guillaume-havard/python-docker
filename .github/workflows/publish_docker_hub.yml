@@ -33,6 +33,15 @@ jobs:
       - name: Set Up docker buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
+
+      # Set up of a builder with a build cache
+      - name: Cache docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
         
       - name: Build and push
         id: docker_build
@@ -40,8 +49,11 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/python-docker:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
           
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
