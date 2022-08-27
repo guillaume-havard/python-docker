@@ -31,7 +31,7 @@ def widgets():
 
     cursor.close()
 
-    return "json.dumps(json_data)
+    return json.dumps(json_data)
 
 
 @app.route("/initdb")
